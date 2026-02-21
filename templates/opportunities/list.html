@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Opportunity Dashboard" }}</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    >
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --text: #14213d;
+            --muted: #60708a;
+            --line: #dbe3ef;
+            --primary: #175cd3;
+            --india: #2d9b56;
+            --global: #2b6cc4;
+            --iit: #d97706;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0b1220;
+            --card-bg: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --line: #27354f;
+            --primary: #60a5fa;
+            --india: #34d399;
+            --global: #60a5fa;
+            --iit: #f59e0b;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 35%, #f8fbff 100%);
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+        [data-theme="dark"] body {
+            background: linear-gradient(180deg, #0b1220 0%, #0f172a 45%, #111827 100%);
+        }
+
+        [data-theme="dark"] .navbar,
+        [data-theme="dark"] footer {
+            background-color: #111827 !important;
+            border-color: #27354f !important;
+        }
+        [data-theme="dark"] .nav-link,
+        [data-theme="dark"] .navbar-brand,
+        [data-theme="dark"] .text-secondary,
+        [data-theme="dark"] .text-dark {
+            color: #d1d5db !important;
+        }
+        [data-theme="dark"] .input-group-text,
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background: #0f172a;
+            color: #e5e7eb;
+            border-color: #334155;
+        }
+
+        .brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #175cd3, #0ea5e9);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid .card {
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .stat-card {
+            position: relative;
+            background: linear-gradient(150deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #dbe6ff;
+            box-shadow: 0 10px 26px rgba(29, 78, 216, 0.08);
+        }
+        [data-theme="dark"] .stat-card {
+            background: linear-gradient(150deg, #111827 0%, #0f172a 100%);
+            border-color: #334155;
+            box-shadow: 0 10px 26px rgba(2, 6, 23, 0.35);
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #175cd3;
+        }
+
+        .stat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #fff;
+            background: #175cd3;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            line-height: 1.1;
+            font-weight: 700;
+            margin: 0;
+            color: #0f172a;
+        }
+        [data-theme="dark"] .stat-value {
+            color: #f8fafc;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-total .stat-icon { background: #2563eb; }
+        .stat-india .stat-icon { background: #2d9b56; }
+        .stat-global .stat-icon { background: #0ea5e9; }
+        .stat-saved .stat-icon { background: #d97706; }
+        .stat-updated .stat-icon { background: #6d28d9; }
+
+        .cards {
+            display: grid;
+            gap: 14px;
+        }
+
+        .opp-card {
+            background: var(--card-bg);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(17, 24, 39, 0.05);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .opp-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+        }
+        [data-theme="dark"] .opp-card:hover {
+            box-shadow: 0 14px 30px rgba(2, 6, 23, 0.45);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.4;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            margin: 0 0 10px;
+            color: #243b53;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        .read-more {
+            border: 0;
+            background: transparent;
+            color: var(--primary);
+            padding: 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .source-badge {
+            display: inline-block;
+            color: #fff;
+            font-size: 0.75rem;
+            letter-spacing: 0.4px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 4px 10px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .source-badge-india { background: var(--india); }
+        .source-badge-global { background: var(--global); }
+        .source-badge-iit { background: var(--iit); }
+        .source-badge-default { background: #6b7280; }
+
+        .apply-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            background: #0f766e;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .save-btn {
+            min-width: 112px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--muted);
+            background: #fff;
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+            padding: 38px 22px;
+        }
+        [data-theme="dark"] .empty-state {
+            background: #0f172a;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column">
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand d-inline-flex align-items-center gap-2 fw-semibold" href="{% url 'home' %}">
+            <span class="brand-logo">OD</span>
+            <span>Opportunity Dashboard</span>
+        </a>
+        <div class="navbar-nav ms-auto flex-row gap-3">
+            <a class="nav-link" href="{% url 'home' %}">Home</a>
+            <a class="nav-link" href="{% url 'opportunities:opportunity-list' %}">Opportunities</a>
+            <a class="nav-link" href="{% url 'opportunities:saved-opportunities' %}">Saved</a>
+            <button id="theme-toggle" class="btn btn-sm btn-outline-secondary ms-2" type="button">
+                <i class="bi bi-moon-stars"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main class="container flex-grow-1 py-4">
+    <div id="client-alert-container"></div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex flex-column gap-3 mb-4">
+        <h1 class="h3 mb-0">{{ page_title|default:"Opportunity Dashboard" }}</h1>
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+            <form method="get" class="d-flex" style="min-width: min(100%, 420px);">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ q }}"
+                        class="form-control"
+                        placeholder="Search by title or description"
+                        aria-label="Search opportunities"
+                    >
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+            <div class="d-flex gap-2">
+                <select id="sourceFilter" class="form-select" aria-label="Filter by source" style="max-width: 140px;">
+                    <option value="ALL">All</option>
+                    <option value="INDIA">India</option>
+                    <option value="GLOBAL">Global</option>
+                    <option value="IIT">IIT</option>
+                </select>
+                <a class="btn btn-outline-primary" href="{% url 'opportunities:saved-opportunities' %}"><i class="bi bi-bookmark-star me-1"></i>Saved</a>
+                <a id="refresh-btn" class="btn btn-primary" href="{% url 'opportunities:scrape-iit' %}">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <i class="bi bi-arrow-repeat me-1"></i>Refresh Opportunities
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4 stats-grid">
+        <div class="col-12 col-sm-6 col-lg">
+            <div class="card h-100 stat-card stat-total">
+                <div class="card-body">
+                    <span class="stat-icon"><i class="bi bi-collection"></i></span>
+                    <div class="stat-label">Total Opportunities</div>
+                    <p class="stat-value">{{ total_count|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg">
+            <div class="card h-100 stat-card stat-india">
+                <div class="card-body">
+                    <span class="stat-icon"><i class="bi bi-geo-alt"></i></span>
+                    <div class="stat-label">India Opportunities (incl. IIT)</div>
+                    <p class="stat-value">{{ india_count|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg">
+            <div class="card h-100 stat-card stat-global">
+                <div class="card-body">
+                    <span class="stat-icon"><i class="bi bi-globe2"></i></span>
+                    <div class="stat-label">Global Opportunities</div>
+                    <p class="stat-value">{{ global_count|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg">
+            <div class="card h-100 stat-card stat-saved">
+                <div class="card-body">
+                    <span class="stat-icon"><i class="bi bi-bookmark-star"></i></span>
+                    <div class="stat-label">Saved Opportunities</div>
+                    <p class="stat-value" id="saved-count-value">{{ saved_count|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg">
+            <div class="card h-100 stat-card stat-updated">
+                <div class="card-body">
+                    <span class="stat-icon"><i class="bi bi-clock-history"></i></span>
+                    <div class="stat-label">Last Updated</div>
+                    <div class="small fw-semibold mt-1">
+                        {% if latest_scrape_time %}
+                            {{ latest_scrape_time }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cards" id="cardsContainer">
+        {% for opp in opportunities %}
+            <article class="opp-card" data-source="{{ opp.source|upper }}" data-opp-id="{{ opp.pk }}">
+                <div class="card-top">
+                    <h2 class="title">
+                        <a href="{% url 'opportunities:opportunity-detail' opp.pk %}" class="text-decoration-none text-dark">
+                            {{ opp.title }}
+                        </a>
+                    </h2>
+                    {% if opp.source|upper == "INDIA" %}
+                        <span class="source-badge source-badge-india"><i class="bi bi-globe2 me-1"></i>INDIA</span>
+                    {% elif opp.source|upper == "GLOBAL" %}
+                        <span class="source-badge source-badge-global"><i class="bi bi-globe2 me-1"></i>GLOBAL</span>
+                    {% elif opp.source|upper == "IIT" %}
+                        <span class="source-badge source-badge-iit"><i class="bi bi-globe2 me-1"></i>IIT</span>
+                    {% else %}
+                        <span class="source-badge source-badge-default"><i class="bi bi-globe2 me-1"></i>{{ opp.source|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="meta">
+                    {{ opp.university }} | {{ opp.scraped_at }}
+                    {% if opp.deadline %}
+                        | <i class="bi bi-calendar-event"></i> Deadline: {{ opp.deadline }}
+                        {% if opp.deadline_status == "CLOSING_SOON" %}
+                            <span class="badge text-bg-danger ms-2">Closing Soon</span>
+                        {% elif opp.deadline_status == "HURRY" %}
+                            <span class="badge text-bg-warning ms-2">Hurry</span>
+                        {% elif opp.deadline_status == "OPEN" %}
+                            <span class="badge text-bg-success ms-2">Open</span>
+                        {% endif %}
+                    {% else %}
+                        | <i class="bi bi-calendar-event"></i> Deadline: Not specified
+                    {% endif %}
+                    {% if opp.opportunity_type == "INTERNSHIP" %}
+                        <span class="badge text-bg-primary ms-2">INTERNSHIP</span>
+                    {% elif opp.opportunity_type == "FELLOWSHIP" %}
+                        <span class="badge text-bg-success ms-2">FELLOWSHIP</span>
+                    {% elif opp.opportunity_type == "SCHOLARSHIP" %}
+                        <span class="badge text-bg-warning ms-2">SCHOLARSHIP</span>
+                    {% elif opp.opportunity_type == "WORKSHOP" %}
+                        <span class="badge text-bg-info ms-2">WORKSHOP</span>
+                    {% elif opp.opportunity_type == "CONFERENCE" %}
+                        <span class="badge text-bg-danger ms-2">CONFERENCE</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary ms-2">OTHER</span>
+                    {% endif %}
+                </div>
+                <p class="description" data-full="{{ opp.description|striptags|escape }}"></p>
+                <button type="button" class="read-more">Read More</button>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button
+                        type="button"
+                        class="btn save-btn {% if opp.pk in bookmarks %}btn-warning{% else %}btn-outline-warning{% endif %}"
+                        data-bookmark-btn
+                        data-opportunity-id="{{ opp.pk }}"
+                    >
+                        {% if opp.pk in bookmarks %}&#9733; Saved{% else %}&#11088; Save{% endif %}
+                    </button>
+                    <a class="apply-btn" href="{{ opp.link }}" target="_blank" rel="noopener noreferrer">Apply Now</a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <div class="display-6 mb-2"><i class="bi bi-inbox"></i></div>
+                {% if q %}
+                    <h3 class="h5">No opportunities found for "{{ q }}"</h3>
+                    <p class="mb-0">Try broader keywords, or refresh to fetch new opportunities.</p>
+                {% else %}
+                    <h3 class="h5">No opportunities available yet</h3>
+                    <p class="mb-0">Run a fresh scrape to populate the dashboard.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-4" aria-label="Opportunities pagination">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                    {% if page_obj.has_previous %}
+                        <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% else %}
+                        <span class="page-link">Previous</span>
+                    {% endif %}
+                </li>
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                    {% if page_obj.has_next %}
+                        <a class="page-link" href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                    {% else %}
+                        <span class="page-link">Next</span>
+                    {% endif %}
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</main>
+
+<footer class="border-top bg-white py-3">
+    <div class="container text-center text-secondary small">
+        Opportunity Dashboard &copy; {% now "Y" %}
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    (function () {
+        var MAX_DESCRIPTION = 150;
+        var cards = Array.prototype.slice.call(document.querySelectorAll(".opp-card"));
+        var filter = document.getElementById("sourceFilter");
+
+        cards.forEach(function (card) {
+            var descElement = card.querySelector(".description");
+            var toggleButton = card.querySelector(".read-more");
+            var fullText = (descElement && descElement.dataset.full ? descElement.dataset.full : "").trim();
+            var shortText = fullText.length > MAX_DESCRIPTION ? fullText.slice(0, MAX_DESCRIPTION).trim() + "..." : fullText;
+            var expanded = false;
+
+            if (!descElement) {
+                return;
+            }
+
+            descElement.textContent = shortText || "No description provided.";
+
+            if (!toggleButton || fullText.length <= MAX_DESCRIPTION) {
+                if (toggleButton) {
+                    toggleButton.style.display = "none";
+                }
+                return;
+            }
+
+            toggleButton.addEventListener("click", function () {
+                expanded = !expanded;
+                descElement.textContent = expanded ? fullText : shortText;
+                toggleButton.textContent = expanded ? "Show Less" : "Read More";
+            });
+        });
+
+        if (filter) {
+            filter.addEventListener("change", function () {
+                var selected = (filter.value || "ALL").toUpperCase();
+                cards.forEach(function (card) {
+                    var source = (card.dataset.source || "").toUpperCase();
+                    card.style.display = (selected === "ALL" || source === selected) ? "block" : "none";
+                });
+            });
+        }
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                var cookies = document.cookie.split(";");
+                for (var i = 0; i < cookies.length; i += 1) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        var bookmarkButtons = Array.prototype.slice.call(document.querySelectorAll("[data-bookmark-btn]"));
+        var savedCountElement = document.getElementById("saved-count-value");
+        var refreshBtn = document.getElementById("refresh-btn");
+        var themeToggle = document.getElementById("theme-toggle");
+        var root = document.documentElement;
+
+        function applyTheme(theme) {
+            if (theme === "dark") {
+                root.setAttribute("data-theme", "dark");
+                if (themeToggle) {
+                    themeToggle.innerHTML = '<i class="bi bi-sun"></i>';
+                }
+            } else {
+                root.removeAttribute("data-theme");
+                if (themeToggle) {
+                    themeToggle.innerHTML = '<i class="bi bi-moon-stars"></i>';
+                }
+            }
+        }
+
+        var savedTheme = localStorage.getItem("od_theme");
+        applyTheme(savedTheme === "dark" ? "dark" : "light");
+        if (themeToggle) {
+            themeToggle.addEventListener("click", function () {
+                var nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                localStorage.setItem("od_theme", nextTheme);
+                applyTheme(nextTheme);
+            });
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener("click", function () {
+                var spinner = refreshBtn.querySelector(".spinner-border");
+                if (spinner) {
+                    spinner.classList.remove("d-none");
+                }
+                refreshBtn.classList.add("disabled");
+            });
+        }
+
+        function showClientError(message) {
+            var container = document.getElementById("client-alert-container");
+            if (!container) {
+                return;
+            }
+            var alert = document.createElement("div");
+            alert.className = "alert alert-danger alert-dismissible fade show";
+            alert.setAttribute("role", "alert");
+            alert.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+            container.appendChild(alert);
+        }
+
+        bookmarkButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                var opportunityId = button.getAttribute("data-opportunity-id");
+                if (!opportunityId) {
+                    return;
+                }
+                fetch("/opportunities/" + opportunityId + "/bookmark/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    }
+                })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Failed to update bookmark.");
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (!data || data.status !== "ok") {
+                        showClientError("Could not update bookmark. Please try again.");
+                        return;
+                    }
+                    var isBookmarked = !!data.bookmarked;
+                    button.textContent = isBookmarked ? "\u2605 Saved" : "\u2B50 Save";
+                    button.classList.toggle("btn-warning", isBookmarked);
+                    button.classList.toggle("btn-outline-warning", !isBookmarked);
+                    if (savedCountElement && typeof data.saved_count === "number") {
+                        savedCountElement.textContent = data.saved_count;
+                    }
+                })
+                .catch(function () {
+                    showClientError("Something went wrong while saving. Please try again.");
+                });
+            });
+        });
+    })();
+</script>
+</body>
+</html>
